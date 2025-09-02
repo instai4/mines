@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mines Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', 'Poppins', 'Segoe UI', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    :root {
+      /* Dark Theme (Default) */
+      --bg-gradient: linear-gradient(135deg, #0d1933 0%, #1a1f3b 100%);
+      --text-color: #fff;
+      --stat-bg: rgba(13, 25, 51, 0.7);
+      --stat-border: none;
+      --panel-bg: rgba(13, 25, 51, 0.7);
+      --panel-border: none;
+      --slider-bg: linear-gradient(90deg, #5e35b1, #7e57c2);
+      --slider-thumb: #fff;
+      --mine-option-bg: rgba(255, 255, 255, 0.1);
+      --mine-option-selected-bg: rgba(126, 87, 194, 0.3);
+      --mine-option-selected-border: #7e57c2;
+      --btn-bet-bg: linear-gradient(45deg, #7e57c2, #5e35b1);
+      --btn-cashout-bg: linear-gradient(45deg, #0057c8, #004de6);
+      --cell-bg: linear-gradient(145deg, #2d2d4d, #252545);
+      --cell-revealed-bg: linear-gradient(145deg, #1a1a2e, #16213e);
+      --mine-bg: linear-gradient(145deg, #d32f2f, #b71c1c);
+      --gem-color: #00e676;
+      --message-popup-bg: rgba(13, 25, 51, 0.95);
+      --message-popup-border: #7e57c2;
+      --footer-bg: transparent;
+      --footer-color: rgba(224, 225, 221, 0.7);
+      --social-link-color: #7e57c2;
+      --social-link-hover-color: #00e676;
+      --logo-color: #7e57c2;
+      --title-color: linear-gradient(45deg, #7e57c2, #5e35b1);
+      --stat-value-color: #7e57c2;
+      --panel-title-color: #7e57c2;
+      --multiplier-color: #7e57c2;
+      --loading-bg: linear-gradient(135deg, #0d1933 0%, #1a1f3b 100%);
+      --loading-logo-color: #7e57c2;
+      --loading-title-color: linear-gradient(45deg, #7e57c2, #5e35b1);
+      --loading-message-color: #b0b0b0;
+      --progress-bg: rgba(255, 255, 255, 0.1);
+      --progress-bar: linear-gradient(90deg, #5e35b1, #7e57c2);
+      --btn-shadow: 0 0 12px rgba(126, 87, 194, 0.4);
+      --btn-hover-shadow: 0 4px 15px rgba(126, 87, 194, 0.6);
+      --cell-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      --message-shadow: 0 0 25px rgba(126, 87, 194, 0.5);
+    }
+
+    body.light-theme {
+      /* Light Theme Variables */
+      --bg-gradient: linear-gradient(to bottom, #fef9f9, #f5faff);
+      --text-color: #333;
+      --stat-bg: #fff;
+      --stat-border: 2px solid #eee;
+      --panel-bg: #fff;
+      --panel-border: 2px solid #eee;
+      --slider-bg: #ffccbc;
+      --slider-thumb: #ff5722;
+      --mine-option-bg: #ffccbc;
+      --mine-option-selected-bg: #ff9800;
+      --mine-option-selected-border: #ff5722;
+      --btn-bet-bg: #ff5722;
+      --btn-cashout-bg: #4caf50;
+      --cell-bg: linear-gradient(145deg, #ffffff, #e0e0e0);
+      --cell-revealed-bg: #ffe0b2;
+      --mine-bg: #ffcdd2;
+      --gem-color: #4caf50;
+      --message-popup-bg: #fff8e1;
+      --message-popup-border: 4px dashed #ff9800;
+      --footer-bg: linear-gradient(to right, #ffccbc, #ffe0b2);
+      --footer-color: #666;
+      --social-link-color: #ff5722;
+      --social-link-hover-color: #4caf50;
+      --logo-color: #ff5722;
+      --title-color: #ff5722;
+      --stat-value-color: #ff5722;
+      --panel-title-color: #ff5722;
+      --multiplier-color: #ff5722;
+      --loading-bg: linear-gradient(to bottom, #fef9f9, #f5faff);
+      --loading-logo-color: #ff5722;
+      --loading-title-color: #ff5722;
+      --loading-message-color: #444;
+      --progress-bg: rgba(255, 152, 0, 0.2);
+      --progress-bar: #ff9800;
+      --btn-shadow: 0 4px #d32f2f;
+      --btn-hover-shadow: 0 6px #d32f2f;
+      --cell-shadow: 4px 4px 10px rgba(0, 0, 0, 0.15), -4px -4px 10px rgba(255, 255, 255, 0.8);
+      --message-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      overflow-x: hidden;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--btn-bet-bg);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: var(--btn-shadow);
+    }
+
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--loading-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .loading-content {
+      text-align: center;
+      padding: 20px;
+      max-width: 90%;
+      background: var(--message-popup-bg);
+      border: var(--message-popup-border);
+      border-radius: 18px 4px 18px 4px;
+      box-shadow: var(--message-shadow);
+    }
+
+    .loading-logo {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: var(--loading-logo-color);
+      text-shadow: 0 0 15px rgba(126, 87, 194, 0.8);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .loading-title {
+      font-size: 2.5rem;
+      background: var(--loading-title-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    .loading-message {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: var(--loading-message-color);
+    }
+
+    .progress-container {
+      width: 80%;
+      max-width: 500px;
+      height: 10px;
+      background: var(--progress-bg);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--progress-bar);
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    .loading-percentage {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--loading-logo-color);
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.5s ease-in;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
+    .logo {
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      color: var(--logo-color);
+      text-shadow: 0 0 10px rgba(126, 87, 194, 0.6);
+    }
+
+    h1 {
+      font-size: 2rem;
+      background: var(--title-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      width: 100%;
+      background: var(--stat-bg);
+      border: var(--stat-border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      gap: 10px;
+    }
+
+    .stat-box {
+      text-align: center;
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--loading-message-color);
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--stat-value-color);
+    }
+
+    .betting-panel {
+      background: var(--panel-bg);
+      border: var(--panel-border);
+      border-radius: 10px;
+      padding: 15px;
+      width: 100%;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      color: var(--panel-title-color);
+    }
+
+    .bet-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      background: var(--slider-bg);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(126, 87, 194, 0.6);
+    }
+
+    .mines-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .mine-option {
+      background: var(--mine-option-bg);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      font-size: 0.85rem;
+    }
+
+    .mine-option.selected {
+      background: var(--mine-option-selected-bg);
+      border: 2px solid var(--mine-option-selected-border);
+      box-shadow: 0 0 10px rgba(126, 87, 194, 0.4);
+      color: #fff;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      touch-action: manipulation;
+      box-shadow: var(--btn-shadow);
+    }
+
+    .btn-bet {
+      background: var(--btn-bet-bg);
+      color: #fff;
+    }
+
+    .btn-bet:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--btn-hover-shadow);
+    }
+
+    .btn-cashout {
+      background: var(--btn-cashout-bg);
+      color: #fff;
+    }
+
+    .btn-cashout:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 200, 83, 0.6);
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 400px;
+      margin: 15px auto;
+    }
+
+    .cell {
+      width: 100%;
+      aspect-ratio: 1/1;
+      background: var(--cell-bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: var(--cell-shadow);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cell::before {
+      content: "?";
+      position: absolute;
+      color: var(--logo-color);
+      font-weight: bold;
+    }
+
+    .cell.revealed {
+      background: var(--cell-revealed-bg);
+      transform: scale(0.95);
+    }
+
+    .cell.revealed::before {
+      content: "";
+    }
+
+    .cell.mine::after {
+      content: "💣";
+      font-size: 1.5rem;
+    }
+
+    .cell.gem::after {
+      content: "💎";
+      font-size: 1.5rem;
+      color: var(--gem-color);
+      text-shadow: 0 0 8px rgba(0, 230, 118, 0.6);
+    }
+
+    .cell.mine.exploded {
+      background: var(--mine-bg);
+      transform: scale(1.03);
+    }
+
+    .multiplier-display {
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 15px 0;
+      color: var(--multiplier-color);
+      text-shadow: 0 0 8px rgba(126, 87, 194, 0.6);
+    }
+
+    .message-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--message-popup-bg);
+      border: var(--message-popup-border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      z-index: 100;
+      box-shadow: var(--message-shadow);
+      max-width: 90%;
+      width: 300px;
+    }
+
+    .message-popup h2 {
+      color: var(--panel-title-color);
+      margin-bottom: 12px;
+      font-size: 1.5rem;
+    }
+
+    .message-popup p {
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      color: var(--footer-color);
+      font-size: 0.9rem;
+      background: var(--footer-bg);
+      padding: 16px 10px;
+      border-radius: 18px 18px 0 0;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .social-links a {
+      color: var(--social-link-color);
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+
+    .social-links a:hover {
+      color: var(--social-link-hover-color);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+      .logo {
+        font-size: 2.2rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .stat-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .game-board {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        max-width: 320px;
+      }
+
+      .cell {
+        font-size: 1.2rem;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+
+      .mine-option {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      .multiplier-display {
+        font-size: 1.3rem;
+      }
+      
+      .loading-title {
+        font-size: 2rem;
+      }
+      
+      .loading-logo {
+        font-size: 3rem;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .game-board {
+        max-width: 280px;
+      }
+
+      .cell {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button id="theme-toggle" class="theme-toggle">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <i class="fas fa-gem"></i>
+      </div>
+      <h1 class="loading-title">MINES GAME</h1>
+      <p class="loading-message">Welcome to the ultimate Mines betting experience</p>
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="loading-percentage" id="loading-percentage">0%</div>
+    </div>
+  </div>
+
+  <div class="container" id="game-container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-gem"></i>
+      </div>
+      <h1>MINES BETTING GAME</h1>
+      <p>Reveal gems to multiply your bet, avoid mines to win!</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">BALANCE</div>
+        <div class="stat-value" id="balance">$1000</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">BET AMOUNT</div>
+        <div class="stat-value" id="current-bet">$0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">MULTIPLIER</div>
+        <div class="stat-value" id="multiplier">1.00x</div>
+      </div>
+    </div>
+
+    <div class="betting-panel" id="betting-panel">
+      <div class="panel-title">PLACE YOUR BET</div>
+      <div class="bet-controls">
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Bet Amount</span>
+            <span id="bet-amount">$50</span>
+          </div>
+          <input type="range" id="bet-slider" min="10" max="500" step="10" value="50">
+        </div>
+
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Number of Mines</span>
+            <span id="mines-count">3</span>
+          </div>
+          <input type="range" id="mines-slider" min="1" max="24" step="1" value="3">
+        </div>
+
+        <div class="mines-selector">
+          <div class="mine-option selected" data-mines="1">1 Mine</div>
+          <div class="mine-option" data-mines="3">3 Mines</div>
+          <div class="mine-option" data-mines="5">5 Mines</div>
+          <div class="mine-option" data-mines="10">10 Mines</div>
+          <div class="mine-option" data-mines="15">15 Mines</div>
+          <div class="mine-option" data-mines="24">24 Mines</div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-bet" id="place-bet-btn">
+          <i class="fas fa-play"></i> PLACE BET
+        </button>
+      </div>
+    </div>
+
+    <div class="multiplier-display" id="multiplier-display">
+      Multiplier: <span id="current-multiplier">1.00x</span>
+    </div>
+
+    <div class="game-board" id="game-board"></div>
+
+    <div class="action-buttons">
+      <button class="btn btn-cashout hidden" id="cash-out-btn">
+        <i class="fas fa-money-bill-wave"></i> CASH OUT
+      </button>
+    </div>
+
+    <footer>
+      <p>DEMO PROJECT BY <a href="https://instai4.github.io/PORT-FOLIO/" target="_blank"> <span style="text-decoration: none;color: var(--stat-value-color); font-weight: bold;">ANURAG</span></a></p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/inst.ai.4?igsh=MWNqaG15OWQ2MGczMA==" target="_blank"><i
+            class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/binu.singh.9028?rdid=Vq5B3EL2V15tuMDo&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1DMBwCvzDL%2F" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.linkedin.com/in/anurag-singh-43230a380/" target="_blank"><i
+            class="fab fa-linkedin"></i></a>
+        <a href="https://github.com/instai4" target="_blank"><i class="fab fa-github"></i></a>
+      </div>
+    </footer>
+  </div>
+
+  <div class="message-popup hidden" id="message-popup">
+    <h2 id="popup-title">Game Over</h2>
+    <p id="popup-message">You hit a mine and lost your bet!</p>
+    <button class="btn btn-bet" id="popup-button">
+      <i class="fas fa-redo"></i> CONTINUE
+    </button>
+  </div>
+
+  <script>
+    // Game state variables
+    let board = [];
+    let minePositions = [];
+    let gameActive = false;
+    let balance = 1000;
+    let currentBet = 0;
+    let multiplier = 1;
+    let minesCount = 3;
+    let revealedCount = 0;
+    let isProcessing = false;
+
+    // DOM elements
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = themeToggle.querySelector('i');
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressBar = document.getElementById('progress-bar');
+    const loadingPercentage = document.getElementById('loading-percentage');
+    const gameContainer = document.getElementById('game-container');
+    const balanceDisplay = document.getElementById('balance');
+    const currentBetDisplay = document.getElementById('current-bet');
+    const multiplierDisplay = document.getElementById('multiplier');
+    const currentMultiplierDisplay = document.getElementById('current-multiplier');
+    const betSlider = document.getElementById('bet-slider');
+    const minesSlider = document.getElementById('mines-slider');
+    const betAmountDisplay = document.getElementById('bet-amount');
+    const minesCountDisplay = document.getElementById('mines-count');
+    const placeBetBtn = document.getElementById('place-bet-btn');
+    const cashOutBtn = document.getElementById('cash-out-btn');
+    const gameBoard = document.getElementById('game-board');
+    const mineOptions = document.querySelectorAll('.mine-option');
+    const bettingPanel = document.getElementById('betting-panel');
+    const messagePopup = document.getElementById('message-popup');
+    const popupTitle = document.getElementById('popup-title');
+    const popupMessage = document.getElementById('popup-message');
+    const popupButton = document.getElementById('popup-button');
+
+    // Theme management
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      } else {
+        document.body.classList.remove('light-theme');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      }
+    }
+
+    function toggleTheme() {
+      if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      }
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Simulate loading process
+    function simulateLoading() {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          
+          progressBar.style.width = `${progress}%`;
+          loadingPercentage.textContent = `${progress}%`;
+          
+          setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+              loadingScreen.classList.add('hidden');
+              gameContainer.style.opacity = '1';
+              initGame();
+            }, 500);
+          }, 500);
+        } else {
+          progressBar.style.width = `${progress}%`;
+          loadingPercentage.textContent = `${Math.round(progress)}%`;
+        }
+      }, 200);
+    }
+
+    // Initialize the game
+    function initGame() {
+      initTheme();
+      updateUI();
+
+      // Add event listeners with touch support
+      addEventListeners();
+    }
+
+    // Add all event listeners with touch support
+    function addEventListeners() {
+      // Use touch events for mobile devices
+      const eventType = 'ontouchstart' in window ? 'touchstart' : 'click';
+      
+      // Place bet button with debounce
+      placeBetBtn.addEventListener(eventType, function(e) {
+        if (eventType === 'touchstart') e.preventDefault();
+        debounce(placeBet, 500);
+      });
+      
+      // Cash out button with debounce
+      cashOutBtn.addEventListener(eventType, function(e) {
+        if (eventType === 'touchstart') e.preventDefault();
+        debounce(cashOut, 500);
+      });
+      
+      // Popup button
+      popupButton.addEventListener(eventType, () => {
+        messagePopup.classList.add('hidden');
+        resetGame();
+      });
+
+      // Sliders
+      betSlider.addEventListener('input', updateBetAmount);
+      minesSlider.addEventListener('input', updateMinesCount);
+
+      // Mine options
+      mineOptions.forEach(option => {
+        option.addEventListener(eventType, () => {
+          mineOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          minesCount = parseInt(option.dataset.mines);
+          minesSlider.value = minesCount;
+          updateMinesCount();
+        });
+      });
+    }
+
+    // Debounce function to prevent multiple rapid clicks
+    function debounce(func, wait) {
+      if (isProcessing) return;
+      isProcessing = true;
+      
+      setTimeout(() => {
+        func();
+        isProcessing = false;
+      }, wait);
+    }
+
+    // Update UI elements
+    function updateUI() {
+      balanceDisplay.textContent = `$${balance}`;
+      currentBetDisplay.textContent = `$${currentBet}`;
+      multiplierDisplay.textContent = `${multiplier.toFixed(2)}x`;
+      currentMultiplierDisplay.textContent = `${multiplier.toFixed(2)}x`;
+    }
+
+    // Update bet amount from slider
+    function updateBetAmount() {
+      betAmountDisplay.textContent = `$${betSlider.value}`;
+    }
+
+    // Update mines count from slider
+    function updateMinesCount() {
+      minesCount = parseInt(minesSlider.value);
+      minesCountDisplay.textContent = minesCount;
+
+      mineOptions.forEach(option => {
+        if (parseInt(option.dataset.mines) === minesCount) {
+          option.classList.add('selected');
+        } else {
+          option.classList.remove('selected');
+        }
+      });
+    }
+
+    // Place a bet
+    function placeBet() {
+      const betAmount = parseInt(betSlider.value);
+
+      if (betAmount > balance) {
+        showMessage("Insufficient Balance", "You don't have enough balance to place this bet!");
+        return;
+      }
+
+      currentBet = betAmount;
+      balance -= currentBet;
+      multiplier = 1;
+
+      bettingPanel.classList.add('hidden');
+      cashOutBtn.classList.remove('hidden');
+
+      createBoard();
+      gameActive = true;
+      updateUI();
+    }
+
+    // Create the game board
+    function createBoard() {
+      gameBoard.innerHTML = '';
+      board = [];
+      minePositions = [];
+      revealedCount = 0;
+      multiplier = 1;
+
+      for (let row = 0; row < 5; row++) {
+        board[row] = [];
+        for (let col = 0; col < 5; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+
+          // Add event listener with touch support
+          const eventType = 'ontouchstart' in window ? 'touchstart' : 'click';
+          cell.addEventListener(eventType, (e) => {
+            if (eventType === 'touchstart') e.preventDefault();
+            if (gameActive) revealCell(row, col);
+          });
+
+          gameBoard.appendChild(cell);
+          board[row][col] = {
+            isMine: false,
+            isRevealed: false,
+            element: cell
+          };
+        }
+      }
+
+      placeMines();
+    }
+
+    // Place mines on the board
+    function placeMines() {
+      let minesPlaced = 0;
+
+      while (minesPlaced < minesCount) {
+        const row = Math.floor(Math.random() * 5);
+        const col = Math.floor(Math.random() * 5);
+
+        if (!board[row][col].isMine) {
+          board[row][col].isMine = true;
+          minePositions.push({ row, col });
+          minesPlaced++;
+        }
+      }
+    }
+
+    // Reveal a cell
+    function revealCell(row, col) {
+      const cell = board[row][col];
+
+      if (cell.isRevealed || isProcessing) return;
+
+      isProcessing = true;
+      cell.isRevealed = true;
+      cell.element.classList.add('revealed');
+      revealedCount++;
+
+      if (cell.isMine) {
+        cell.element.classList.add('mine', 'exploded');
+        gameActive = false;
+        revealAllMines();
+        showMessage("Game Over", `You hit a mine and lost $${currentBet}!`);
+        setTimeout(() => {
+          resetGame();
+          isProcessing = false;
+        }, 2000);
+      } else {
+        cell.element.classList.add('gem');
+
+        const multiplierIncrease = 1 + (minesCount * 0.08);
+        multiplier *= multiplierIncrease;
+
+        if (multiplier > 100) multiplier = 100;
+
+        updateUI();
+        isProcessing = false;
+
+        if (revealedCount === (25 - minesCount)) {
+          gameActive = false;
+          winGame();
+        }
+      }
+    }
+
+    // Reveal all mines
+    function revealAllMines() {
+      for (const { row, col } of minePositions) {
+        const cell = board[row][col];
+        if (!cell.isRevealed) {
+          cell.isRevealed = true;
+          cell.element.classList.add('revealed', 'mine');
+        }
+      }
+    }
+
+    // Cash out
+    function cashOut() {
+      if (!gameActive) return;
+
+      gameActive = false;
+      const winnings = Math.floor(currentBet * multiplier);
+      balance += winnings;
+
+      showMessage("Cash Out", `You cashed out and won $${winnings}!`);
+      revealAllMines();
+      setTimeout(() => {
+        resetGame();
+      }, 2000);
+    }
+
+    // Win the game
+    function winGame() {
+      const winnings = Math.floor(currentBet * multiplier);
+      balance += winnings;
+
+      showMessage("Congratulations!", `You won $${winnings} by finding all gems!`);
+      setTimeout(() => {
+        resetGame();
+      }, 2000);
+    }
+
+    // Show message popup
+    function showMessage(title, message) {
+      popupTitle.textContent = title;
+      popupMessage.textContent = message;
+      messagePopup.classList.remove('hidden');
+    }
+
+    // Reset the game
+    function resetGame() {
+      gameActive = false;
+      currentBet = 0;
+      multiplier = 1;
+
+      bettingPanel.classList.remove('hidden');
+      cashOutBtn.classList.add('hidden');
+      messagePopup.classList.add('hidden');
+      updateUI();
+    }
+
+    // Start the loading process when the page loads
+    window.addEventListener('load', simulateLoading);
+  </script>
+</body>
+</html>
